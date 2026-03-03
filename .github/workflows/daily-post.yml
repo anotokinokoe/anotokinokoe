@@ -10,17 +10,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Pythonセットアップ
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: ライブラリインストール
-        run: pip install anthropic requests
-      
-      - name: ポスト生成・Discord送信
+        run: pip install anthropic requests tweepy
+
+      - name: ポスト生成・Discord送信・X投稿
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
         run: python generate_post.py
