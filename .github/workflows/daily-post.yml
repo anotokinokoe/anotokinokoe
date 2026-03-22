@@ -1,0 +1,44 @@
+name: Daily X Post
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 毎日 UTC 0:00 (JST 9:00)
+  workflow_dispatch:  # 手動実行
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Japanese fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+
+      - name: Install dependencies
+        run: |
+          pip install anthropic requests tweepy matplotlib
+
+      - name: Random delay (0-5 min)
+        run: |
+          DELAY=$((RANDOM % 300))
+          echo "Waiting ${DELAY} seconds..."
+          sleep $DELAY
+
+      - name: Generate and post
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: python generate_post.py
