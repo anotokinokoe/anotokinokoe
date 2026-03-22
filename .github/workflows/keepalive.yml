@@ -1,0 +1,29 @@
+name: Supabase Keepalive
+
+# 5日ごとにSupabaseにアクセスして一時停止を防止
+on:
+  schedule:
+    - cron: '0 0 */5 * *'  # 5日ごと UTC 0:00
+  workflow_dispatch:  # 手動実行も可能
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "Pinging Supabase to prevent pause..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/voices?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}")
+          echo "Response status: $STATUS"
+          if [ "$STATUS" -eq 200 ]; then
+            echo "✅ Supabase is alive"
+          else
+            echo "⚠️ Supabase responded with status $STATUS"
+            exit 1
+          fi
